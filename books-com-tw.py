@@ -34,7 +34,7 @@ def get_ISBN(url):
     return isbn
 
 def save_to_csv(items, file):
-    with open(file, 'w+', newline='') as fp:
+    with open(file, 'w+', newline='', encoding='utf-8') as fp:
         writer = csv.writer(fp)
         for item in items:
             writer.writerow(item)
