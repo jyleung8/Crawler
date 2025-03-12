@@ -22,17 +22,6 @@ def parse_html(r):
 
     return soup
 
-def get_ISBN(url):
-    soup = parse_html(get_resource("http:" + url))
-    if soup != None:
-        try:
-           isbn = soup.find(itemprop="productID")["content"][5:]
-        except:
-           isbn = "0000"
-    else:
-        isbn = "1111"
-    return isbn
-
 def save_to_csv(items, file):
     with open(file, 'w+', newline='', encoding='utf-8') as fp:
         writer = csv.writer(fp)
