@@ -9,6 +9,9 @@ import datetime
 from bs4 import BeautifulSoup
 
 
+headers = {"user-agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.157 Safari/537.36"}
+
+
 def save_to_csv(items, file):
     with open(file, 'w+', newline='', encoding='utf-8') as fp:
         writer = csv.writer(fp, quoting=csv.QUOTE_ALL)
@@ -23,7 +26,7 @@ def stock_news(stock_name = '大盤'):
   stock_name = stock_name + ' -盤中速報'
 
   data = []
-  json_data = requests.get(f'https://ess.api.cnyes.com/ess/api/v1/news/keyword?q={stock_name}&limit=5&page=1').json()
+  json_data = requests.get(f'https://ess.api.cnyes.com/ess/api/v1/news/keyword?q={stock_name}&limit=30&page=1').json()
 
   items = json_data['data']['items']
   for item in items:
@@ -31,14 +34,16 @@ def stock_news(stock_name = '大盤'):
       title = item["title"]
       publish_at = item["publishAt"]
       utc_time = datetime.datetime.utcfromtimestamp(publish_at)
-      formatted_date = utc_time.strftime('%Y-%m-%d')
-      url = requests.get(f'https://news.cnyes.com/news/id/{news_id}').content
-      soup = BeautifulSoup(url, 'html.parser')
+      formatted_date = utc_time.strftime('%Y-%m-%d %H:%M:%S')
+
+      url = f'https://news.cnyes.com/news/id/{news_id}'
+      r = requests.get(url, headers=headers).content
+      soup = BeautifulSoup(r, 'html.parser')
       p_elements = soup.find_all('p')
       p=''
       for paragraph in p_elements[4:]:
           p += paragraph.get_text()
-      data.append([stock_name, formatted_date, title, p])
+      data.append([stock_name, formatted_date, title, p, url])
 
   return data
 
@@ -59,5 +64,4 @@ if __name__ == '__main__':
 
     currtime = datetime.datetime.fromtimestamp(ts).strftime('%H:%M:%S')
     print (f'[{currtime}] CSV file {fname} saved')
-
 
